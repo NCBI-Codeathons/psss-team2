@@ -20,8 +20,10 @@ rule novel_implementation:
     conda:
         "../envs/novel_implementation.yaml"
     shell:
+        # Could look like this: {{ time -v novel_implementation {input.query} {input.subject} ; }} &> {log}
+        # Will only be mock for now
         """
-        {{ time -v novel_implementation {input.query} {input.subject} ; }} &> {log}
+        touch {output}
         """
 
 
@@ -40,6 +42,7 @@ rule post_processing:
         "../envs/post_processing.yaml"
     shell:
         """
+        touch {output}
         """
 
 
