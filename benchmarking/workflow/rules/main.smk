@@ -12,7 +12,6 @@ rule novel_implementation:
         subject=config["subject"],
     output:
         outfile=get_novel_implementation_output(),
-    params:
     log:
         "output/logs/novel_implementation.log",
     benchmark:
@@ -33,7 +32,6 @@ rule post_processing:
         ground_truth=config["ground_truth"],
     output:
         outfile=get_post_processing_output(),
-    params:
     log:
         "output/logs/post_processing.log",
     benchmark:
@@ -51,7 +49,6 @@ rule performance_report:
         post_processing_outfile=get_post_processing_output(),
     output:
         performance_report=get_performance_report_output(),
-    params:
     log:
         "output/logs/performance_report.log",
     benchmark:
