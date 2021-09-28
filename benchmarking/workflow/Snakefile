@@ -10,8 +10,8 @@ rule novel_implementation:
         subject -> reference database 
     """
     input:
-        query="",
-        subject="",
+        query=config["query"],
+        subject=config["subject"],
     output:
         outfile="",
     params:
@@ -30,6 +30,7 @@ rule novel_implementation:
 rule post_processing:
     input:
         novel_implementation_outfile="",
+        ground_truth=config["ground_truth"],
     output:
         outfile="",
     params:
