@@ -19,7 +19,7 @@ def validate_inputs():
     )
 
     for k in inputs:
-        file = config.get(k)
+        file = config.get(k, "")
         assert Path(file).exists(), f"Input file '{k}' not found: {file}."
 
 
@@ -35,15 +35,15 @@ def get_final_output():
         get_performance_report_output()
     )
 
-    return output
+    return outputs
 
 
 def get_novel_implementation_output():
-    return config.get("novel_implementation")
+    return "output/" + config.get("novel_implementation_output", "novel_implementation_output.tsv")
 
 def get_post_processing_output():
-    return config.get("post_processing")
+    return "output/" + config.get("post_processing_output", "post_processing_output.tsv")
 
 def get_performance_report_output():
-    return config.get("performance_report")
+    return "output/" + config.get("performance_report_output", "performance_report_output.tsv")
 
