@@ -13,7 +13,7 @@ rule novel_implementation:
         query=config["query"],
         subject=config["subject"],
     output:
-        outfile="",
+        outfile=get_novel_implementation_output(),
     params:
     log:
         "output/logs/novel_implementation.log",
@@ -29,10 +29,10 @@ rule novel_implementation:
 
 rule post_processing:
     input:
-        novel_implementation_outfile="",
+        novel_implementation_outfile=get_novel_implementation_output(),
         ground_truth=config["ground_truth"],
     output:
-        outfile="",
+        outfile=get_post_processing_output(),
     params:
     log:
         "output/logs/post_processing.log",
@@ -41,14 +41,15 @@ rule post_processing:
     conda:
         "../envs/post_processing.yaml"
     shell:
-
+        """
+        """
 
 
 rule performance_report:
     input:
-        post_processing_outfile="",
+        post_processing_outfile=get_post_processing_output(),
     output:
-        performance_report="",
+        performance_report=get_performance_report_output(),
     params:
     log:
         "output/logs/performance_report.log",
