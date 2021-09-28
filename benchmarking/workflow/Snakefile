@@ -1,64 +1,11 @@
-config: "config/config.yaml"
+configfile: "config/config.yaml"
 
 
-rule novel_implementation:
-    """
-    Runs the novel implementation of the contig containment algorithm.
-
-    Input:
-        query -> contigs (in .FASTA format?),
-        subject -> reference database 
-    """
-    input:
-        query="",
-        subject="",
-    output:
-        outfile="",
-    params:
-    log:
-        "output/logs/novel_implementation.log",
-    benchmark:
-        "output/benchmarks/novel_implementation.txt"
-    conda:
-        "../envs/novel_implementation.yaml"
-    shell:
-        """
-        {{ time -v novel_implementation {input.query} {input.subject} ; }} &> {log}
-        """
-
-
-rule post_processing:
-    input:
-        novel_implementation_outfile="",
-    output:
-        outfile="",
-    params:
-    log:
-        "output/logs/post_processing.log",
-    benchmark:
-        "output/benchmarks/post_processing.txt"
-    conda:
-        "../envs/post_processing.yaml"
-    shell:
-
-
-
-rule performance_report:
-    input:
-        post_processing_outfile="",
-    output:
-        performance_report="",
-    params:
-    log:
-        "output/logs/performance_report.log",
-    benchmark:
-        "output/benchmarks/performance_report.txt"
-    conda:
-        "../envs/performance_report.yaml"
-    script:
-        "../scripts/performance_report.py"
+# Rules
+include: "rules/common.smk"
+include: "rules/main.smk"
 
 
 rule all:
-    input: 
-        get_final_output(), 
+    input:
+        get_final_output(),
