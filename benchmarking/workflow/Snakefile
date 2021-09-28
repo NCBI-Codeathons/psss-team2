@@ -1,4 +1,4 @@
-config: "config/config.yaml"
+configfile: "config/config.yaml"
 
 # Rules
 include: "rules/common.smk"
