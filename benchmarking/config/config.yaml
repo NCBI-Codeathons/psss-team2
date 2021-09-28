@@ -1,0 +1,4 @@
+# These are just tentative formats
+query: "path/to/contigs.fasta"
+subject: "path/to/db.db"
+ground_truth: "path/to/ground_truth.tsv"
