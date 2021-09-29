@@ -45,7 +45,7 @@ rule post_processing:
 
 rule performance_report:
     input:
-        post_processing_outfile="",
+        true_containments="",predicted_containments="",
     output:
         performance_report="",
     params:
