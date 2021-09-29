@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import sys
 
 import numpy as np
@@ -103,28 +104,44 @@ def main(args):
     json.dump(metrics, fp=out)
 
 
-def parse_args():
-    if 'snakemake' in locals():
-        args = argparse.Namespace()
-        args.true_tsv = snakemake.input['true_containments']
-        args.pred_tsv = snakemake.input['predicted_containments']
-        args.output = snakemake.output['performance_report']
-    else:
-        desc = """
-        Assess performance of a contig containment tool
-        """
-        parser = argparse.ArgumentParser(description=desc)
-        parser.add_argument("true_tsv", type=str,
-                            help="true containments in tabular BLAST output")
-        parser.add_argument("pred_tsv", type=str,
-                            help="predicted containments in tabular BLAST output")
-        parser.add_argument("-o", "--output", type=str,
-                            help="the file to save results to", default=None)
-        args = parser.parse_args()
+def parse_argparse_args():
+    desc = """
+    Assess performance of a contig containment tool
+    """
+    parser = argparse.ArgumentParser(description=desc)
+    parser.add_argument("true_tsv", type=str,
+                        help="true containments in tabular BLAST output")
+    parser.add_argument("pred_tsv", type=str,
+                        help="predicted containments in tabular BLAST output")
+    parser.add_argument("-o", "--output", type=str,
+                        help="the file to save results to", default=None)
+    args = parser.parse_args()
 
     return args
 
 
-if __name__ == '__main__':
-    args = parse_args()
+def parse_snakemake_args(snakemake):
+    args = argparse.Namespace()
+    args.true_tsv = snakemake.input['ground_truth']
+    args.pred_tsv = snakemake.input['predicted_containments']
+    args.output = snakemake.output['performance_report']
+    return args
+
+
+
+if 'snakemake' in locals():
+    args = parse_snakemake_args(snakemake)
+    logging.basicConfig(
+    filename=str(snakemake.log),
+    encoding="utf-8",
+    level=logging.DEBUG,
+    format="%(asctime)s %(message)s",
+    datefmt="%m/%d/%Y %H:%M:%S",
+)
+    logging.info(f"Starting script {__file__.split('/')[-1]}.")
+    logging.debug(f"Full script path: {__file__}")
+    main(args)
+    logging.info(f"Done.")
+elif __name__ == '__main__':
+    args = parse_argparse_args()
     main(args)
