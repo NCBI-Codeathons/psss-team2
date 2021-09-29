@@ -1,4 +1,12 @@
 # These are just tentative formats
+
+
+# Inputs
 query: "path/to/contigs.fasta"
 subject: "path/to/db.db"
 ground_truth: "path/to/ground_truth.tsv"
+
+# Outputs
+novel_implementation_output: "novel_implementation_output.tsv"
+post_processing_output: "post_processing_output.tsv"
+performance_report_output: "performance_report_output.tsv"

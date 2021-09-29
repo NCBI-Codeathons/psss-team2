@@ -1,0 +1,7 @@
+# Environment file for the Snakemake executor
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - mamba
+  - snakemake
