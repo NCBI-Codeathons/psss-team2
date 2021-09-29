@@ -26,27 +26,10 @@ rule novel_implementation:
         """
 
 
-rule post_processing:
-    input:
-        novel_implementation_outfile=get_novel_implementation_output(),
-        ground_truth=config["ground_truth"],
-    output:
-        outfile=get_post_processing_output(),
-    log:
-        "output/logs/post_processing.log",
-    benchmark:
-        "output/benchmarks/post_processing.txt"
-    conda:
-        "../envs/post_processing.yaml"
-    shell:
-        """
-        touch {output}
-        """
-
-
 rule performance_report:
     input:
-        post_processing_outfile=get_post_processing_output(),
+        post_processing_outfile=config["query"],
+        ground_truth=config["ground_truth"],
     output:
         performance_report=get_performance_report_output(),
     log:
