@@ -28,7 +28,7 @@ rule novel_implementation:
 
 rule performance_report:
     input:
-        post_processing_outfile=config["query"],
+        predicted_containments=config["query"],
         ground_truth=config["ground_truth"],
     output:
         performance_report=get_performance_report_output(),
