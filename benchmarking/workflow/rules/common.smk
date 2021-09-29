@@ -27,7 +27,6 @@ validate_inputs()
 def get_final_output():
     outputs = (
         get_novel_implementation_output(),
-        get_post_processing_output(),
         get_performance_report_output(),
     )
 
@@ -37,12 +36,6 @@ def get_final_output():
 def get_novel_implementation_output():
     return str(Path("output/").joinpath(config.get(
         "novel_implementation_output", "novel_implementation_output.tsv"
-    )))
-
-
-def get_post_processing_output():
-    return str(Path("output/").joinpath(config.get(
-        "post_processing_output", "post_processing_output.tsv"
     )))
 
 
