@@ -18,8 +18,6 @@ def calc_scores(true, pred):
     metrics['recall'] = tp / (tp + fn)
     return metrics
 
-def build_graphs(true, pred):
-    pass
 
 def main(args):
     """  Example TSV
@@ -33,29 +31,29 @@ def main(args):
     pred_df = pd.read_csv(args.pred_tsv, sep='\t')
 
     # map files to indices
-    ctgs = set(true_df['qseqid'])
-    ctgs.update(true_df['sseqid'])
+    ctgs = set(true_df.iloc[:, 0])
+    ctgs.update(true_df.iloc[:, 1])
 
     # find and filter extra contigs in predictions file
-    extras = set(pred_df['qseqid'])
-    extras.update(pred_df['sseqid'])
+    extras = set(pred_df.iloc[:, 0])
+    extras.update(pred_df.iloc[:, 1])
     extras -= ctgs
 
     if len(extras):
         print((f'Found {len(extras)} extra contigs in {args.pred_tsv}. '
                 'Discarding before computing metrics.'), file=sys.stderr)
 
-        mask = np.logical_or(pred_df['qseqid'].isin(ctgs),
-                             pred_df['sseqid'].isin(ctgs))
+        mask = np.logical_or(pred_df.iloc[:, 0].isin(ctgs),
+                             pred_df.iloc[:, 0].isin(ctgs))
         pred_df = pred_df[mask]
 
     # build graph
     ## map sequence identifiers to indices
     ctgs = dict(zip(ctgs, range(len(ctgs))))
-    true_df['qseqid_idx'] = [ctgs[s] for s in true_df['qseqid']]
-    true_df['sseqid_idx'] = [ctgs[s] for s in true_df['sseqid']]
-    pred_df['qseqid_idx'] = [ctgs[s] for s in pred_df['qseqid']]
-    pred_df['sseqid_idx'] = [ctgs[s] for s in pred_df['sseqid']]
+    true_df['qseqid_idx'] = [ctgs[s] for s in true_df.iloc[:, 0]]
+    true_df['sseqid_idx'] = [ctgs[s] for s in true_df.iloc[:, 1]]
+    pred_df['qseqid_idx'] = [ctgs[s] for s in pred_df.iloc[:, 0]]
+    pred_df['sseqid_idx'] = [ctgs[s] for s in pred_df.iloc[:, 1]]
 
     ## build adjacency matrix
     n_ctgs = len(ctgs)
