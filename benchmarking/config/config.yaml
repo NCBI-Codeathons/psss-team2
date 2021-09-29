@@ -2,9 +2,9 @@
 
 
 # Inputs
-query: "path/to/contigs.fasta"
-subject: "path/to/db.db"
-ground_truth: "path/to/ground_truth.tsv"
+query: "example/example_submission.tsv"
+subject: "example/example_gs.tsv"
+ground_truth: "example/example_gs.tsv"
 
 # Outputs
 novel_implementation_output: "novel_implementation_output.tsv"
