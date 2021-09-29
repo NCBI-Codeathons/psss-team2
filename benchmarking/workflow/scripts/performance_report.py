@@ -11,34 +11,16 @@ def calc_scores(true, pred):
     fp = (diff < 0).sum()
     fn = (diff > 0).sum()
     tp = true.sum() - fn
-    tn = np.prod(true.shape) - tp - fn - fp
 
     metrics = dict()
     metrics['precision'] = tp / (tp + fp)
-    metrics['sensitivity'] = tp / (tp + fn)
-    metrics['specificity'] = tn / (tn + fp)
-    metrics['accuracy'] = (tp + tn) / (tn + tp + fn + fp)
-    metrics['f1'] = tp / (tp + (fp + fn)/2)
+    metrics['recall'] = tp / (tp + fn)
     return metrics
 
 def build_graphs(true, pred):
     pass
 
-def main():
-    desc = """
-    Assess performance of a contig containment tool
-    """
-
-    parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument("true_tsv", type=str,
-                        help="true containments in tabular BLAST output")
-    parser.add_argument("pred_tsv", type=str,
-                        help="predicted containments in tabular BLAST output")
-    parser.add_argument("-o", "--output", type=str,
-                        help="the file to save results to", default=None)
-
-    args = parser.parse_args()
-
+def main(args):
     """  Example TSV
     qseqid	sseqid	pident	length	mismatch	gapopen	qstart	qend	sstart	send	evalue	bitscore
     nmdc:mga04781_15	nmdc:mga04781_2	97.6	8564	*	*	1	8565	5736	14300	*	*
@@ -81,12 +63,12 @@ def main():
     true_g[true_df['qseqid_idx'], true_df['sseqid_idx']] = true_df['pident']
     pred_g[pred_df['qseqid_idx'], pred_df['sseqid_idx']] = 1
     true_coo = true_g.tocoo()              # hold onto this for extract pident bins
-    true_g = true_g.tocsr() != 0
+    true_g = true_g.tocsr()
     pred_g = pred_g.tocsr()
 
 
     # calculate metrics:
-    metrics = calc_scores(true_g, pred_g)
+    metrics = calc_scores(true_g != 0, pred_g)
 
     # calculate metrics across PID
     n_bins = 50
@@ -95,18 +77,20 @@ def main():
     pid = true_coo.data
     _, bins = np.histogram(pid, bins=n_bins)
     pid_metrics = {m: list() for m in metrics}
-    pid_metrics['pid'] = list()
+    pid_metrics['min_pid'] = list()
     for i in range(n_bins):
-        s, e = bins[i], bins[i+1]
-        pid_mask = np.logical_and(pid >= s, pid < e)
+        s = bins[i]
+        pid_mask = pid >= s
         row_mask = row[pid_mask]
         col_mask = col[pid_mask]
-        bin_metrics = calc_scores(true_g[row_mask][:, col_mask],
-                                  pred_g[row_mask][:, col_mask])
+
+        bin_metrics = calc_scores(true_g[row_mask, col_mask] >= s,
+                                  pred_g[row_mask, col_mask])
         for m in metrics:
             pid_metrics[m].append(bin_metrics[m])
-        pid_metrics['pid'].append((s + e)/2)
+        pid_metrics['min_pid'].append(s)
 
+    del pid_metrics['precision']
     metrics['pid_metrics'] = pid_metrics
 
     # output metrics
@@ -118,5 +102,28 @@ def main():
     json.dump(metrics, fp=out)
 
 
+def parse_args():
+    if 'snakemake' in locals():
+        args = argparse.Namespace()
+        args.true_tsv = snakemake.input['true_containments']
+        args.pred_tsv = snakemake.input['predicted_containments']
+        args.output = snakemake.output['performance_report']
+    else:
+        desc = """
+        Assess performance of a contig containment tool
+        """
+        parser = argparse.ArgumentParser(description=desc)
+        parser.add_argument("true_tsv", type=str,
+                            help="true containments in tabular BLAST output")
+        parser.add_argument("pred_tsv", type=str,
+                            help="predicted containments in tabular BLAST output")
+        parser.add_argument("-o", "--output", type=str,
+                            help="the file to save results to", default=None)
+        args = parser.parse_args()
+
+    return args
+
+
 if __name__ == '__main__':
-    main()
+    args = parse_args()
+    main(args)
