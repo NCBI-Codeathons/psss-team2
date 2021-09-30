@@ -43,7 +43,7 @@ rule download_s3_data:
             aws s3 cp $query_path {params.query_dir} &>> {log}
         done < {input.query_paths}
 
-        cat {params.query_dir}/*.fna > {output.query_fna} &>> {log}
+        {{ cat {params.query_dir}/*.fna > {output.query_fna} ; }} &>> {log}
 
         mkdir -p {params.reference_dir} &>> {log}
 
@@ -51,7 +51,7 @@ rule download_s3_data:
             aws s3 cp $reference_path {params.reference_dir} &>> {log}
         done < {input.reference_paths}
 
-        cat {params.reference_dir}/*.fna > {output.reference_fna} &>> {log}
+        {{ cat {params.reference_dir}/*.fna > {output.reference_fna} ; }} &>> {log}
         """
 
 
