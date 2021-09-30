@@ -122,7 +122,7 @@ rule mmseqs2:
                 --search-type {params.search_type}  \
                 {input.query_fna_filtered}          \
                 {input.reference_fna_filtered}      \
-                {params.outfile} &>> {log}
+                {params.outfile} /tmp &>> {log}
 
         gzip {params.outfile}
         """
