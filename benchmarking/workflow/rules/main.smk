@@ -146,6 +146,9 @@ rule synteny:
         "../scripts/run_synteny.R"
 
 
+
+
+
 rule novel_implementation:
     """
     Runs the novel implementation of the contig containment algorithm.
