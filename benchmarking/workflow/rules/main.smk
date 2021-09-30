@@ -125,7 +125,7 @@ rule mmseqs2:
                 {input.query_fna_filtered}          \
                 {input.reference_fna_filtered}      \
                 {params.outfile}                    \
-                {params.tmp_dir}
+                {params.tmp_dir} &>> {log}
 
         gzip {params.outfile}
         """
