@@ -11,5 +11,9 @@ data_table: "example/data.tsv"
 novel_implementation_output: "novel_implementation_output.tsv"
 post_processing_output: "post_processing_output.tsv"
 performance_report_output: "performance_report_output.json"
+data_dir: "/disk"
 query_paths: "query_paths.txt"
 reference_paths: "reference_paths.txt"
+
+# Params
+minlength: 500
