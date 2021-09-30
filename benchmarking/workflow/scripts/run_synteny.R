@@ -128,7 +128,7 @@ TIMESTART <- Sys.time()
 
 # deal with flexible input data
 # ARGS <- commandArgs(trailingOnly = TRUE)
-TargetFolder <- snakemake@params[["target_folder"]]
+TargetFolder <- snakemake@params[["reference_folder"]]
 FocalSeqs <- snakemake@input[["query_fna_filtered"]]
 
 # local testing

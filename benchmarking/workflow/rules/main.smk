@@ -135,7 +135,7 @@ rule synteny:
     output:
         synteny_outfile="output/synteny_results.b6",
     params:
-        reference_folder=lambda w, input_: str(Path(input_.reference_fna_filtered).parent),
+        reference_folder=lambda w, input: str(Path(input.reference_fna_filtered).parent),
     log:
         "output/logs/synteny.log",
     benchmark:
