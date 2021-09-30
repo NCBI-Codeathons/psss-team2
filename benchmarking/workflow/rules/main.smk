@@ -41,7 +41,7 @@ rule download_s3_data:
 
         while read query_path; do
             aws s3 cp $query_path {params.query_dir} &>> {log}
-        done < {input.query_paths.txt}
+        done < {input.query_paths}
 
         cat {params.query_dir}/*.fna > {output.query_fna} &>> {log}
 
