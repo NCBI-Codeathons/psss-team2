@@ -98,6 +98,39 @@ rule samtools_faidx:
         """
 
 
+rule mmseqs2:
+    input:
+        query_fna_filtered=get_query_fna_filtered(),
+        reference_fna_filtered=get_reference_fna_filtered(),
+    output:
+        outfile_gz="output/mmseqs2_results.b6.gz",
+    params:
+        outfile=lambda w, output: output.outfile_gz[:-3],
+        method="easy-search",
+        search_type=3,
+        tmp_dir="tmp"
+    threads:
+        workflow.cores,
+    log:
+        "output/logs/mmseqs2.log",
+    benchmark:
+        "output/benchmarks/mmseqs2.txt"
+    conda:
+        "../envs/mmseqs2.yaml"
+    shell:
+        """
+        mmseqs  {params.method}                     \
+                --threads {threads}                 \
+                --search-type {params.search_type}  \
+                {input.query_fna_filtered}          \
+                {input.reference_fna_filtered}      \
+                {params.outfile}                    \
+                {params.tmp_dir}
+
+        gzip {params.outfile}
+        """
+
+
 rule novel_implementation:
     """
     Runs the novel implementation of the contig containment algorithm.
