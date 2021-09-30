@@ -12,7 +12,7 @@ from pathlib import Path
 def validate_inputs():
 
     # These must exist in the config.yaml file
-    inputs = ("query", "subject", "ground_truth")
+    inputs = ("subject", "ground_truth")
 
     for k in inputs:
         file = config.get(k, "")
@@ -33,6 +33,14 @@ def get_final_output():
     return outputs
 
 
+def get_query_paths():
+    return str(Path("output/").joinpath(config["query_paths"]))
+    
+
+def get_reference_paths():
+    return str(Path("output/").joinpath(config["reference_paths"]))
+
+
 def get_novel_implementation_output():
     return str(Path("output/").joinpath(config.get(
         "novel_implementation_output", "novel_implementation_output.tsv"
@@ -41,5 +49,5 @@ def get_novel_implementation_output():
 
 def get_performance_report_output():
     return str(Path("output/").joinpath(config.get(
-        "performance_report_output", "performance_report_output.tsv"
+        "performance_report_output", "performance_report_output.json"
     )))

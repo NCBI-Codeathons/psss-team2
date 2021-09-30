@@ -1,3 +1,19 @@
+rule create_data_paths:
+    input:
+        query=config["query"],
+        data_table=config["data_table"],
+    output:
+        query_paths=get_query_paths(),
+        reference_paths=get_reference_paths(),
+    log:
+        "output/logs/create_data_paths.log"
+    benchmark:
+        "output/benchmarks/create_data_paths.txt"
+    conda:
+        "../envs/performance_report.yaml"
+    script:
+        "../scripts/create_data_paths.py"
+
 
 rule novel_implementation:
     """
@@ -28,7 +44,7 @@ rule novel_implementation:
 
 rule performance_report:
     input:
-        predicted_containments=config["query"],
+        predicted_containments="example/example_submission.tsv",
         ground_truth=config["ground_truth"],
     output:
         performance_report=get_performance_report_output(),

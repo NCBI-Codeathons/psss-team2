@@ -2,11 +2,14 @@
 
 
 # Inputs
-query: "example/example_submission.tsv"
+query: "nmdc:mga04781"
 subject: "example/example_gs.tsv"
 ground_truth: "example/example_gs.tsv"
+data_table: "example/data.tsv"
 
 # Outputs
 novel_implementation_output: "novel_implementation_output.tsv"
 post_processing_output: "post_processing_output.tsv"
-performance_report_output: "performance_report_output.tsv"
+performance_report_output: "performance_report_output.json"
+query_paths: "query_paths.txt"
+reference_paths: "reference_paths.txt"
