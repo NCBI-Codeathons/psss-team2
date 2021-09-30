@@ -82,8 +82,8 @@ rule samtools_faidx:
         query_fna_filtered=get_fna_filtered("query"),
         reference_fna_filtered=get_fna_filtered("reference"),
     output:
-        query_fai=str(Path(get_fna_filtered("query")).with_suffix(".fai")),
-        reference_fai=str(Path(get_fna_filtered("reference")).with_suffix(".fai")),
+        query_fai=get_fai("query"),
+        reference_fai=get_fai("reference"),
     threads: workflow.cores
     log:
         "output/logs/samtools_faidx.log",
@@ -101,11 +101,15 @@ rule samtools_faidx:
 rule mmseqs2:
     input:
         query_fna_filtered=get_fna_filtered("query"),
+        query_fai=get_fai("query"),
         reference_fna_filtered=get_fna_filtered("reference"),
+        reference_fai=get_fai("reference"),
     output:
         outfile_gz="output/mmseqs2_results.b6.gz",
+        outfile_filtered_gz="output/mmseqs2_results_filtered.b6.gz",
     params:
         outfile=lambda w, output: output.outfile_gz[:-3],
+        outfile_filtered=lambda w, output: output.outfile_filtered_gz[:-3],
         method="easy-search",
         search_type=3,
     threads: workflow.cores
@@ -124,7 +128,14 @@ rule mmseqs2:
                 {input.reference_fna_filtered}      \
                 {params.outfile} /tmp &>> {log}
 
+        python workflow/scripts/filter_blast_6_to_containments.py   \
+               -i {params.outfile}                                  \
+               -q {input.query_fai}                                 \
+               -r {input.reference_fai}                             \
+               -o {params.outfile_filtered}                         \
+
         gzip {params.outfile}
+        gzip {params.outfile_filtered}
         """
 
 
@@ -135,7 +146,9 @@ rule synteny:
     output:
         synteny_outfile="output/synteny_results.b6",
     params:
-        reference_folder=lambda w, input: str(Path(input.reference_fna_filtered).parent),
+        reference_folder=lambda w, input: str(
+            Path(input.reference_fna_filtered).parent
+        ),
     log:
         "output/logs/synteny.log",
     benchmark:

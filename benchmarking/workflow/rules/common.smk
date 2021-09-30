@@ -56,6 +56,11 @@ def get_fna_filtered(kind="query"):
     return str(Path(get_fna(kind)).with_suffix(f".ml{minlength}.fna"))
 
 
+def get_fai(kind="query"):
+    assert_valid_data_kind(kind)
+    return str(Path(get_fna_filtered(kind)).with_suffix(".fai"))
+
+
 def get_novel_implementation_output():
     return str(
         Path("output/").joinpath(
