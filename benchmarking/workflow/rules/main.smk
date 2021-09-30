@@ -1,10 +1,13 @@
+from pathlib import Path
+
 rule create_data_paths:
     input:
-        query=config["query"],
         data_table=config["data_table"],
     output:
         query_paths=get_query_paths(),
         reference_paths=get_reference_paths(),
+    params:
+        query=config["query"],
     log:
         "output/logs/create_data_paths.log"
     benchmark:
