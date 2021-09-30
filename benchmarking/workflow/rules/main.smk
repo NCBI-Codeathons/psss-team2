@@ -128,6 +128,24 @@ rule mmseqs2:
         """
 
 
+rule synteny:
+    input:
+        query_fna_filtered=get_fna_filtered("query"),
+        reference_fna_filtered=get_fna_filtered("reference"),
+    output:
+        synteny_outfile="output/synteny_results.b6"
+    params:
+        reference_folder=lambda w, input_: str(Path(input_.reference).parent)
+    log:
+        "output/logs/synteny.log",
+    benchmark:
+        "output/benchmarks/synteny.txt"
+    conda:
+        "../envs/synteny.yaml"
+    script:
+        "../scripts/run_synteny.R"
+
+
 rule novel_implementation:
     """
     Runs the novel implementation of the contig containment algorithm.
