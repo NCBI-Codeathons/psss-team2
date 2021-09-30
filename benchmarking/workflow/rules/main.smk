@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 rule create_data_paths:
     input:
         data_table=config["data_table"],
@@ -9,13 +10,71 @@ rule create_data_paths:
     params:
         query=config["query"],
     log:
-        "output/logs/create_data_paths.log"
+        "output/logs/create_data_paths.log",
     benchmark:
         "output/benchmarks/create_data_paths.txt"
     conda:
         "../envs/performance_report.yaml"
     script:
         "../scripts/create_data_paths.py"
+
+
+rule download_s3_data:
+    input:
+        query_paths=get_query_paths(),
+        reference_paths=get_reference_paths(),
+    output:
+        query_fna=get_query_fna(),
+        reference_fna=get_reference_fna(),
+    params:
+        query_dir=lambda w, output: str(Path(output.query_fna).parent),
+        reference_dir=lambda w, output: str(Path(output.reference_fna).parent),
+    log:
+        "output/logs/download_s3_data.log",
+    benchmark:
+        "output/benchmarks/download_s3_data.txt"
+    conda:
+        "../envs/aws.yaml"
+    shell:
+        """
+        mkdir -p {params.query_dir} &>> {log}
+
+        while read query_path; do
+            aws s3 cp $query_path {params.query_dir} &>> {log}
+        done < {input.query_paths.txt}
+
+        cat {params.query_dir}/*.fna > {output.query_fna} &>> {log}
+
+        mkdir -p {params.reference_dir} &>> {log}
+
+        while read reference_path; do
+            aws s3 cp $reference_path {params.reference_dir} &>> {log}
+        done < {input.reference_paths.txt}
+
+        cat {params.reference_dir}/*.fna > {output.reference_fna} &>> {log}
+        """
+
+
+rule bbmap_reformat:
+    input:
+        query_fna=get_query_fna(),
+        reference_fna=get_reference_fna(),
+    output:
+        query_fna_filtered=get_query_fna_filtered(),
+        reference_fna_filtered=get_reference_fna_filtered(),
+    params:
+        minlength=config["minlength"],
+    log:
+        "output/logs/bbmap_reformat.log",
+    benchmark:
+        "output/benchmarks/bbmap_reformat.txt"
+    conda:
+        "../envs/bbmap.yaml"
+    shell:
+        """
+        reformat.sh in={input.query_fna} out={output.query_fna} ml={params.minlength} &>> {log}
+        reformat.sh in={input.reference_fna} out={output.reference_fna} ml={params.minlength} &>> {log}
+        """
 
 
 rule novel_implementation:
