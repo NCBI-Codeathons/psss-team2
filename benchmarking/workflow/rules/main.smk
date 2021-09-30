@@ -108,7 +108,7 @@ rule mmseqs2:
         outfile=lambda w, output: output.outfile_gz[:-3],
         method="easy-search",
         search_type=3,
-        tmp_dir="tmp"
+        tmp_dir="/tmp"
     threads:
         workflow.cores,
     log:
