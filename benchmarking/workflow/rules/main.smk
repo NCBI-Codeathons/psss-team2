@@ -77,6 +77,27 @@ rule bbmap_reformat:
         """
 
 
+rule samtools_faidx:
+    input:
+        query_fna_filtered=get_query_fna_filtered(),
+        reference_fna_filtered=get_reference_fna_filtered(),
+    output:
+        query_fai=str(Path(get_query_fna_filtered()).with_suffix(".fai")),
+        reference_fai=str(Path(get_reference_fna_filtered()).with_suffix(".fai")),
+    threads: workflow.cores,
+    log:
+        "output/logs/samtools_faidx.log",
+    benchmark:
+        "output/benchmarks/samtools_faidx.txt"
+    conda:
+        "../envs/samtools.yaml"
+    shell:
+        """
+        samtools faidx -@ {threads} {input.query_fna_filtered} {output.query_fai} &>> {log}
+        samtools faidx -@ {threads} {input.reference_fna_filtered} {output.reference_fai} &>> {log}
+        """
+
+
 rule novel_implementation:
     """
     Runs the novel implementation of the contig containment algorithm.
