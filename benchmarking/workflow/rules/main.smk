@@ -140,8 +140,8 @@ rule novel_implementation:
         subject -> reference database 
     """
     input:
-        query=config["query"],
-        subject=config["subject"],
+        query=get_query_fna_filtered(),
+        subject=get_reference_fna_filtered(),
     output:
         outfile=get_novel_implementation_output(),
     log:
