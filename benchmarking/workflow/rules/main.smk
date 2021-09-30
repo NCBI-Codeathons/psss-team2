@@ -84,7 +84,7 @@ rule samtools_faidx:
     output:
         query_fai=str(Path(get_fna_filtered("query")).with_suffix(".fai")),
         reference_fai=str(Path(get_fna_filtered("reference")).with_suffix(".fai")),
-    threads: workflow.cores,
+    threads: workflow.cores
     log:
         "output/logs/samtools_faidx.log",
     benchmark:
@@ -108,9 +108,7 @@ rule mmseqs2:
         outfile=lambda w, output: output.outfile_gz[:-3],
         method="easy-search",
         search_type=3,
-        tmp_dir="/tmp"
-    threads:
-        workflow.cores,
+    threads: workflow.cores
     log:
         "output/logs/mmseqs2.log",
     benchmark:
