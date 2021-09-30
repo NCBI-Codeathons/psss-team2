@@ -20,6 +20,30 @@ def calc_scores(true, pred):
     return metrics
 
 
+def qual_metrics(true, pred):
+    true_coo = true.tocoo()
+    n_bins = 50
+    row = true_coo.row
+    col = true_coo.col
+    pid = true_coo.data
+    _, bins = np.histogram(pid, bins=n_bins)
+    metrics = ['precision', 'recall']
+    pid_metrics = {m: list() for m in metrics}
+    pid_metrics['min_qual'] = list()
+    for i in range(n_bins):
+        s = bins[i]
+        pid_mask = pid >= s
+        row_mask = row[pid_mask]
+        col_mask = col[pid_mask]
+        bin_metrics = calc_scores((true[row_mask, col_mask] >= s).astype(int),
+                                  (pred[row_mask, col_mask] != 0).astype(int))
+        for m in metrics:
+            pid_metrics[m].append(bin_metrics[m])
+        pid_metrics['min_qual'].append(s)
+
+    return pid_metrics
+
+
 def main(args):
     """  Example TSV
     qseqid	sseqid	pident	length	mismatch	gapopen	qstart	qend	sstart	send	evalue	bitscore
@@ -30,6 +54,10 @@ def main(args):
     # read in files
     true_df = pd.read_csv(args.true_tsv, sep='\t')
     pred_df = pd.read_csv(args.pred_tsv, sep='\t')
+
+    # If predictions have quality scores, we will generate some extra metrics.
+    # The third column is assumed to be quality scores.
+    pred_has_qual = len(pred_df.columns) > 2
 
     # map files to indices
     ctgs = set(true_df.iloc[:, 0])
@@ -60,38 +88,21 @@ def main(args):
     n_ctgs = len(ctgs)
     true_g = sps.dok_matrix((n_ctgs, n_ctgs), dtype=float)
     pred_g = sps.dok_matrix((n_ctgs, n_ctgs), dtype=np.int8)
-    true_g[true_df['qseqid_idx'], true_df['sseqid_idx']] = true_df['pident']
-    pred_g[pred_df['qseqid_idx'], pred_df['sseqid_idx']] = 1
-    true_coo = true_g.tocoo()              # hold onto this for extract pident bins
+    true_g[true_df['qseqid_idx'], true_df['sseqid_idx']] = true_df.iloc[:, 2]
+    pred_g[pred_df['qseqid_idx'], pred_df['sseqid_idx']] = pred_df.iloc[:, 2] if pred_has_qual else 1
     true_g = true_g.tocsr()
     pred_g = pred_g.tocsr()
 
 
     # calculate metrics:
-    metrics = calc_scores(true_g != 0, pred_g)
+    metrics = calc_scores(true_g != 0, pred_g != 0)
 
-    # calculate metrics across PID
-    n_bins = 50
-    row = true_coo.row
-    col = true_coo.col
-    pid = true_coo.data
-    _, bins = np.histogram(pid, bins=n_bins)
-    pid_metrics = {m: list() for m in metrics}
-    pid_metrics['min_pid'] = list()
-    for i in range(n_bins):
-        s = bins[i]
-        pid_mask = pid >= s
-        row_mask = row[pid_mask]
-        col_mask = col[pid_mask]
+    pid_metrics = qual_metrics(true_g, pred_g)
+    metrics['recall_qual'] = {'recall': pid_metrics['recall'], 'qual': pid_metrics['min_qual']}
 
-        bin_metrics = calc_scores(true_g[row_mask, col_mask] >= s,
-                                  pred_g[row_mask, col_mask])
-        for m in metrics:
-            pid_metrics[m].append(bin_metrics[m])
-        pid_metrics['min_pid'].append(s)
-
-    del pid_metrics['precision']
-    metrics['pid_metrics'] = pid_metrics
+    if pred_has_qual:
+        pid_metrics = qual_metrics(pred_g, true_g)
+        metrics['precision_qual'] = {'precision': pid_metrics['recall'], 'qual': pid_metrics['min_qual']}
 
     # output metrics
     if args.output is not None:
@@ -124,7 +135,6 @@ def parse_snakemake_args(snakemake):
     args.pred_tsv = snakemake.input['predicted_containments']
     args.output = snakemake.output['performance_report']
     return args
-
 
 
 if 'snakemake' in locals():
