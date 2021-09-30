@@ -49,7 +49,7 @@ rule download_s3_data:
 
         while read reference_path; do
             aws s3 cp $reference_path {params.reference_dir} &>> {log}
-        done < {input.reference_paths.txt}
+        done < {input.reference_paths}
 
         cat {params.reference_dir}/*.fna > {output.reference_fna} &>> {log}
         """
