@@ -133,9 +133,9 @@ rule synteny:
         query_fna_filtered=get_fna_filtered("query"),
         reference_fna_filtered=get_fna_filtered("reference"),
     output:
-        synteny_outfile="output/synteny_results.b6"
+        synteny_outfile="output/synteny_results.b6",
     params:
-        reference_folder=lambda w, input_: str(Path(input_.reference).parent)
+        reference_folder=lambda w, input_: str(Path(input_.reference).parent),
     log:
         "output/logs/synteny.log",
     benchmark:
@@ -144,9 +144,6 @@ rule synteny:
         "../envs/synteny.yaml"
     script:
         "../scripts/run_synteny.R"
-
-
-
 
 
 rule novel_implementation:
