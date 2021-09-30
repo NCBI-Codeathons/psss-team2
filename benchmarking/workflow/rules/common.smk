@@ -34,30 +34,25 @@ def get_final_output():
     return outputs
 
 
-def get_query_paths():
-    return str(Path("output/").joinpath(config["query_paths"]))
+def assert_valid_data_kind(kind):
+    valid_kinds = ("query", "reference")
+    assert kind in valid_kinds, f"'kind' must be one of {valid_kinds}, got '{kind}'."
 
 
-def get_reference_paths():
-    return str(Path("output/").joinpath(config["reference_paths"]))
+def get_paths(kind="query"):
+    assert_valid_data_kind(kind)
+    return str(Path("output/").joinpath(config[f"{kind}_paths"]))
 
 
-def get_query_fna():
-    return str(Path(config["data_dir"]).joinpath("query/query.fna"))
+def get_fna(kind="query"):
+    assert_valid_data_kind(kind)
+    return str(Path(config["data_dir"]).joinpath(f"{kind}/{kind}.fna"))
 
 
-def get_reference_fna():
-    return str(Path(config["data_dir"]).joinpath("reference/reference.fna"))
-
-
-def get_query_fna_filtered():
+def get_fna_filtered(kind="query"):
+    assert_valid_data_kind(kind)
     minlength = config.get("minlength", 500)
-    return str(Path(get_query_fna()).with_suffix(f".ml{minlength}.fna"))
-
-
-def get_reference_fna_filtered():
-    minlength = config.get("minlength", 500)
-    return str(Path(get_reference_fna()).with_suffix(f".ml{minlength}.fna"))
+    return str(Path(get_fna(kind)).with_suffix(f".ml{minlength}.fna"))
 
 
 def get_novel_implementation_output():

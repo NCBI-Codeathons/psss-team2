@@ -5,8 +5,8 @@ rule create_data_paths:
     input:
         data_table=config["data_table"],
     output:
-        query_paths=get_query_paths(),
-        reference_paths=get_reference_paths(),
+        query_paths=get_paths("query"),
+        reference_paths=get_paths("reference"),
     params:
         query=config["query"],
     log:
@@ -21,11 +21,11 @@ rule create_data_paths:
 
 rule download_s3_data:
     input:
-        query_paths=get_query_paths(),
-        reference_paths=get_reference_paths(),
+        query_paths=get_paths("query"),
+        reference_paths=get_paths("reference"),
     output:
-        query_fna=get_query_fna(),
-        reference_fna=get_reference_fna(),
+        query_fna=get_fna("query"),
+        reference_fna=get_fna("reference"),
     params:
         query_dir=lambda w, output: str(Path(output.query_fna).parent),
         reference_dir=lambda w, output: str(Path(output.reference_fna).parent),
@@ -57,11 +57,11 @@ rule download_s3_data:
 
 rule bbmap_reformat:
     input:
-        query_fna=get_query_fna(),
-        reference_fna=get_reference_fna(),
+        query_fna=get_fna("query"),
+        reference_fna=get_fna("reference"),
     output:
-        query_fna_filtered=get_query_fna_filtered(),
-        reference_fna_filtered=get_reference_fna_filtered(),
+        query_fna_filtered=get_fna_filtered("query"),
+        reference_fna_filtered=get_fna_filtered("reference"),
     params:
         minlength=config["minlength"],
     log:
@@ -79,11 +79,11 @@ rule bbmap_reformat:
 
 rule samtools_faidx:
     input:
-        query_fna_filtered=get_query_fna_filtered(),
-        reference_fna_filtered=get_reference_fna_filtered(),
+        query_fna_filtered=get_fna_filtered("query"),
+        reference_fna_filtered=get_fna_filtered("reference"),
     output:
-        query_fai=str(Path(get_query_fna_filtered()).with_suffix(".fai")),
-        reference_fai=str(Path(get_reference_fna_filtered()).with_suffix(".fai")),
+        query_fai=str(Path(get_fna_filtered("query")).with_suffix(".fai")),
+        reference_fai=str(Path(get_fna_filtered("reference")).with_suffix(".fai")),
     threads: workflow.cores,
     log:
         "output/logs/samtools_faidx.log",
@@ -100,8 +100,8 @@ rule samtools_faidx:
 
 rule mmseqs2:
     input:
-        query_fna_filtered=get_query_fna_filtered(),
-        reference_fna_filtered=get_reference_fna_filtered(),
+        query_fna_filtered=get_fna_filtered("query"),
+        reference_fna_filtered=get_fna_filtered("reference"),
     output:
         outfile_gz="output/mmseqs2_results.b6.gz",
     params:
@@ -124,8 +124,7 @@ rule mmseqs2:
                 --search-type {params.search_type}  \
                 {input.query_fna_filtered}          \
                 {input.reference_fna_filtered}      \
-                {params.outfile}                    \
-                {params.tmp_dir} &>> {log}
+                {params.outfile} &>> {log}
 
         gzip {params.outfile}
         """
@@ -140,8 +139,8 @@ rule novel_implementation:
         subject -> reference database 
     """
     input:
-        query=get_query_fna_filtered(),
-        subject=get_reference_fna_filtered(),
+        query=get_fna_filtered("query"),
+        subject=get_fna_filtered("reference"),
     output:
         outfile=get_novel_implementation_output(),
     log:
