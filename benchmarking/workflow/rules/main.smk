@@ -159,6 +159,29 @@ rule synteny:
         "../scripts/run_synteny.R"
 
 
+rule makeblastdb:
+    input:
+        reference_fna_filtered=get_fna_filtered("reference"),
+    output:
+        reference_fna_nhr=lambda w, input: str(Path(input.reference_fna_filtered).with_suffix(".fna.nhr")),
+    params:
+        input_type="fasta",
+        dbtype="nucl",
+    log:
+        "output/logs/makeblastdb.log"
+    benchmark:
+        "output/benchmarks/makeblastdb.txt"
+    conda:
+        "../envs/blast.yaml"
+    shell:
+        """
+        makeblastdb -in {input}                     \
+                    -input_type {params.input_type} \
+                    -dbtype {params.dbtype}         \
+                    -parse_seqids
+        """
+
+
 rule novel_implementation:
     """
     Runs the novel implementation of the contig containment algorithm.
