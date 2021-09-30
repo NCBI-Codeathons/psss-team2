@@ -45,7 +45,7 @@ def find_containments(results_path, query_index_path, reference_index_path, outp
 
 
     if has_header:
-        search_results = pd.read_csv(results_path, sep='\t', header=True)
+        search_results = pd.read_csv(results_path, sep='\t')
         search_results.columns = BOUTFMT6_COLUMNS
     else:
         search_results = pd.read_csv(results_path, sep='\t', header=None, names=BOUTFMT6_COLUMNS)
