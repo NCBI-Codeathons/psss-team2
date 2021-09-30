@@ -72,8 +72,8 @@ rule bbmap_reformat:
         "../envs/bbmap.yaml"
     shell:
         """
-        reformat.sh in={input.query_fna} out={output.query_fna} ml={params.minlength} &>> {log}
-        reformat.sh in={input.reference_fna} out={output.reference_fna} ml={params.minlength} &>> {log}
+        reformat.sh in={input.query_fna} out={output.query_fna_filtered} ml={params.minlength} &>> {log}
+        reformat.sh in={input.reference_fna} out={output.reference_fna_filtered} ml={params.minlength} &>> {log}
         """
 
 
