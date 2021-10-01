@@ -155,8 +155,13 @@ rule synteny:
         "output/benchmarks/synteny.txt"
     conda:
         "../envs/synteny.yaml"
-    script:
-        "../scripts/run_synteny.R"
+    shell:
+        """
+        RScript workflow/scripts/run_synteny.R          \
+                {params.reference_folder}               \
+                {input.query_fna_filtered}              \
+                {output.synteny_outfile} &> {log}
+        """
 
 
 rule makeblastdb:
@@ -178,7 +183,7 @@ rule makeblastdb:
         makeblastdb -in {input}                     \
                     -input_type {params.input_type} \
                     -dbtype {params.dbtype}         \
-                    -parse_seqids
+                    -parse_seqids &> {log}
         """
 
 

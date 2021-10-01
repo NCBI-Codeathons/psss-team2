@@ -128,8 +128,8 @@ TIMESTART <- Sys.time()
 
 # deal with flexible input data
 # ARGS <- commandArgs(trailingOnly = TRUE)
-TargetFolder <- snakemake@params[["reference_folder"]]
-FocalSeqs <- snakemake@input[["query_fna_filtered"]]
+TargetFolder <- ARGS[1L]
+FocalSeqs <- ARGS[2L]
 
 # local testing
 # TargetFolder <- "~/PSSS_CodeathonData"
@@ -249,7 +249,7 @@ ResTable <- do.call(rbind,
 ResTable <- ResTable[ResTable$pident > 0.95, ]
 
 write.table(x = ResTable,
-            file = snakemake@output[["synteny_outfile"]],
+            file = ARGS[L3],
             append = FALSE,
             quote = FALSE,
             row.names = FALSE,
