@@ -1,12 +1,21 @@
 import argparse
 import json
 import logging
+import os
 import sys
 
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+
+def check_outdir(path):
+    if not os.path.exists(path):
+        os.mkdir(path)
+    elif not os.path.isdir(path):
+        print(f'{path} exists and is not a directory', file=sys.stderr)
+        exit(1)
+
 
 def check_ax(ax):
     if ax is None:
@@ -33,6 +42,8 @@ def plot_recall(data, ax=None, label=None, color=None):
 
 
 def main(args):
+
+    check_outdir(args.outdir)
 
     labels = args.labels
     if labels is None:

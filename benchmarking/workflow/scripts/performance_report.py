@@ -61,16 +61,15 @@ def metrics_by_qual(true, pred):
 
 
 def main(args):
-    """  Example TSV
+    """Example TSV
     qseqid	sseqid	pident	length	mismatch	gapopen	qstart	qend	sstart	send	evalue	bitscore
     nmdc:mga04781_15	nmdc:mga04781_2	97.6	8564	*	*	1	8565	5736	14300	*	*
     nmdc:mga04781_3	nmdc:mga04781_15	95.8	6551	*	*	8865	15416	1	6552	*	*
     """
 
     # read in files
-    true_df = pd.read_csv(args.true_tsv, sep='\t')
-    pred_df = pd.read_csv(args.pred_tsv, sep='\t')
-
+    true_df = pd.read_csv(args.true_tsv, sep="\t")
+    pred_df = pd.read_csv(args.pred_tsv, sep="\t")
     # If predictions have quality scores, we will generate some extra metrics.
     # The third column is assumed to be quality scores.
     pred_has_qual = len(pred_df.columns) > 2
@@ -113,7 +112,6 @@ def main(args):
     true_g = true_g.tocsr()
     pred_g = pred_g.tocsr()
 
-
     # calculate metrics:
     metrics = calc_scores((true_g != 0).astype(int), (pred_g != 0).astype(int))
 
@@ -129,7 +127,7 @@ def main(args):
 
     # output metrics
     if args.output is not None:
-        out = open(args.output, 'w')
+        out = open(args.output, "w")
     else:
         out = sys.stdout
 
@@ -166,16 +164,16 @@ def parse_snakemake_args(snakemake):
 if 'snakemake' in locals():
     args = parse_snakemake_args(snakemake)
     logging.basicConfig(
-    filename=str(snakemake.log),
-    encoding="utf-8",
-    level=logging.DEBUG,
-    format="%(asctime)s %(message)s",
-    datefmt="%m/%d/%Y %H:%M:%S",
-)
+        filename=str(snakemake.log),
+        encoding="utf-8",
+        level=logging.DEBUG,
+        format="%(asctime)s %(message)s",
+        datefmt="%m/%d/%Y %H:%M:%S",
+    )
     logging.info(f"Starting script {__file__.split('/')[-1]}.")
     logging.debug(f"Full script path: {__file__}")
     main(args)
     logging.info(f"Done.")
-elif __name__ == '__main__':
+elif __name__ == "__main__":
     args = parse_argparse_args()
     main(args)
