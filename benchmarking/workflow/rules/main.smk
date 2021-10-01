@@ -157,7 +157,7 @@ rule synteny:
         "../envs/synteny.yaml"
     shell:
         """
-        RScript workflow/scripts/run_synteny.R          \
+        Rscript workflow/scripts/run_synteny.R          \
                 {params.reference_folder}               \
                 {input.query_fna_filtered}              \
                 {params.synteny_outfile} &> {log}

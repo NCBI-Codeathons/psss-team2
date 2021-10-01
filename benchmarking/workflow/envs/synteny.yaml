@@ -3,5 +3,4 @@ channels:
   - bioconda
 dependencies:
   - r-base
-  - r-littler
   - bioconductor-decipher
