@@ -2,5 +2,5 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - mmseqs2
+  - blast
   - pandas

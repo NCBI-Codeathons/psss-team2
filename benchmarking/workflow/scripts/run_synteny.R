@@ -127,15 +127,16 @@ ConvertResults <- function(SyntenyObject) {
 TIMESTART <- Sys.time()
 
 # deal with flexible input data
-# ARGS <- commandArgs(trailingOnly = TRUE)
-TargetFolder <- snakemake@params[["reference_folder"]]
-FocalSeqs <- snakemake@input[["query_fna_filtered"]]
+ARGS <- commandArgs(trailingOnly = TRUE)
+TargetFolder <- ARGS[1L]
+FocalSeqs <- ARGS[2L]
 
 # local testing
 # TargetFolder <- "~/PSSS_CodeathonData"
 # FocalSeqs <- "~/PSSS_CodeathonData/nmdc_mga04781_contigs.fna"
 
 FileVector01 <- list.files(path = TargetFolder,
+                           pattern = "contigs\\.fna$",
                            full.names = TRUE)
 
 # check for focal seqs in target folder, if present remove them
@@ -249,7 +250,7 @@ ResTable <- do.call(rbind,
 ResTable <- ResTable[ResTable$pident > 0.95, ]
 
 write.table(x = ResTable,
-            file = snakemake@output[["synteny_outfile"]],
+            file = ARGS[3L],
             append = FALSE,
             quote = FALSE,
             row.names = FALSE,

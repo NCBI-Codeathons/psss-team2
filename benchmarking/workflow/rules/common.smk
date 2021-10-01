@@ -27,7 +27,8 @@ validate_inputs()
 def get_final_output():
     outputs = (
         "output/mmseqs2_results.b6.gz",
-        "output/synteny_results.b6",
+        "output/blastn_results.b6.gz",
+        "output/synteny_results.b6.gz",
         get_novel_implementation_output(),
         get_performance_report_output(),
     )
@@ -54,6 +55,19 @@ def get_fna_filtered(kind="query"):
     assert_valid_data_kind(kind)
     minlength = config.get("minlength", 500)
     return str(Path(get_fna(kind)).with_suffix(f".ml{minlength}.fna"))
+
+
+def get_fai(kind="query"):
+    assert_valid_data_kind(kind)
+    return str(Path(get_fna_filtered(kind)).with_suffix(".fna.fai"))
+
+
+def get_makeblastdb_out():
+    extensions = ["nhr", "nin", "ndb"]
+    return [
+        str(Path(get_fna_filtered("reference")).with_suffix(f".fna.{ext}"))
+        for ext in extensions
+    ]
 
 
 def get_novel_implementation_output():

@@ -82,9 +82,8 @@ rule samtools_faidx:
         query_fna_filtered=get_fna_filtered("query"),
         reference_fna_filtered=get_fna_filtered("reference"),
     output:
-        query_fai=str(Path(get_fna_filtered("query")).with_suffix(".fai")),
-        reference_fai=str(Path(get_fna_filtered("reference")).with_suffix(".fai")),
-    threads: workflow.cores
+        query_fai=get_fai("query"),
+        reference_fai=get_fai("reference"),
     log:
         "output/logs/samtools_faidx.log",
     benchmark:
@@ -93,19 +92,23 @@ rule samtools_faidx:
         "../envs/samtools.yaml"
     shell:
         """
-        samtools faidx -@ {threads} {input.query_fna_filtered} {output.query_fai} &>> {log}
-        samtools faidx -@ {threads} {input.reference_fna_filtered} {output.reference_fai} &>> {log}
+        samtools faidx {input.query_fna_filtered} &>> {log}
+        samtools faidx {input.reference_fna_filtered} &>> {log}
         """
 
 
 rule mmseqs2:
     input:
         query_fna_filtered=get_fna_filtered("query"),
+        query_fai=get_fai("query"),
         reference_fna_filtered=get_fna_filtered("reference"),
+        reference_fai=get_fai("reference"),
     output:
         outfile_gz="output/mmseqs2_results.b6.gz",
+        outfile_filtered_gz="output/mmseqs2_results_filtered.b6.gz",
     params:
         outfile=lambda w, output: output.outfile_gz[:-3],
+        outfile_filtered=lambda w, output: output.outfile_filtered_gz[:-3],
         method="easy-search",
         search_type=3,
     threads: workflow.cores
@@ -124,7 +127,15 @@ rule mmseqs2:
                 {input.reference_fna_filtered}      \
                 {params.outfile} /tmp &>> {log}
 
-        gzip {params.outfile}
+        python workflow/scripts/filter_blast_6_to_containments.py   \
+               -i {params.outfile}                                  \
+               -q {input.query_fai}                                 \
+               -r {input.reference_fai}                             \
+               -o {params.outfile_filtered}                         \
+               --as_decimal &>> {log}
+
+        gzip {params.outfile} &>> {log}
+        gzip {params.outfile_filtered} &>> {log}
         """
 
 
@@ -133,17 +144,50 @@ rule synteny:
         query_fna_filtered=get_fna_filtered("query"),
         reference_fna_filtered=get_fna_filtered("reference"),
     output:
-        synteny_outfile="output/synteny_results.b6",
+        synteny_outfile_gz="output/synteny_results.b6.gz",
     params:
-        reference_folder=lambda w, input: str(Path(input.reference_fna_filtered).parent),
+        synteny_outfile=lambda w, output: output.synteny_outfile_gz[:-3],
+        reference_folder=lambda w, input: str(
+            Path(input.reference_fna_filtered).parent
+        ),
     log:
         "output/logs/synteny.log",
     benchmark:
         "output/benchmarks/synteny.txt"
     conda:
         "../envs/synteny.yaml"
-    script:
-        "../scripts/run_synteny.R"
+    shell:
+        """
+        Rscript workflow/scripts/run_synteny.R          \
+                {params.reference_folder}               \
+                {input.query_fna_filtered}              \
+                {params.synteny_outfile} &> {log}
+
+        gzip {params.synteny_outfile} &>> {log}
+        """
+
+
+rule makeblastdb:
+    input:
+        reference_fna_filtered=get_fna_filtered("reference"),
+    output:
+        outfiles=get_makeblastdb_out(),
+    params:
+        input_type="fasta",
+        dbtype="nucl",
+    log:
+        "output/logs/makeblastdb.log",
+    benchmark:
+        "output/benchmarks/makeblastdb.txt"
+    conda:
+        "../envs/blast.yaml"
+    shell:
+        """
+        makeblastdb -in {input}                     \
+                    -input_type {params.input_type} \
+                    -dbtype {params.dbtype}         \
+                    -parse_seqids &> {log}
+        """
 
 
 rule novel_implementation:
@@ -173,10 +217,51 @@ rule novel_implementation:
         """
 
 
+rule blastn:
+    input:
+        query=get_fna_filtered("query"),
+        query_fai=get_fai("query"),
+        reference_fai=get_fai("reference"),
+        makeblastdb_out=get_makeblastdb_out(),
+    output:
+        outfile_gz="output/blastn_results.b6.gz",
+        outfile_filtered_gz="output/blastn_results_filtered.b6.gz",
+    params:
+        outfmt=6,
+        outfile=lambda w, output: output.outfile_gz[:-3],
+        outfile_filtered=lambda w, output: output.outfile_filtered_gz[:-3],
+        db=lambda w, input: str(Path(input.makeblastdb_out[0]).with_suffix("")),
+    threads: workflow.cores
+    log:
+        "output/logs/blastn.log",
+    benchmark:
+        "output/benchmarks/blastn.txt"
+    conda:
+        "../envs/blast.yaml"
+    shell:
+        """
+        blastn  -db {params.db}                 \
+                -query {input.query}            \
+                -out {params.outfile}           \
+                -outfmt {params.outfmt}         \
+                -num_threads {threads}          \
+                &>> {log}
+
+        python workflow/scripts/filter_blast_6_to_containments.py   \
+               -i {params.outfile}                                  \
+               -q {input.query_fai}                                 \
+               -r {input.reference_fai}                             \
+               -o {params.outfile_filtered} &>> {log}
+
+        gzip {params.outfile} &>> {log}
+        gzip {params.outfile_filtered} &>> {log}
+        """
+
+
 rule performance_report:
     input:
-        predicted_containments="example/example_submission.tsv",
-        ground_truth=config["ground_truth"],
+        predicted_containments="output/mmseqs2_results_filtered.b6.gz",
+        ground_truth="output/blastn_results_filtered.b6.gz",
     output:
         performance_report=get_performance_report_output(),
     log:
