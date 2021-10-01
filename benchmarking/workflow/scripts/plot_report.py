@@ -7,35 +7,45 @@ import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 
+def check_ax(ax):
+    if ax is None:
+        return plt.gca()
+    return ax
+
+
+def plot_recall_pid(data, ax=None):
+    ax = check_ax(ax)
+    ax.plot(data['recall_pid']['pid'], data['recall_pid']['recall'], c='k')
+    ax.tick_params('both', labelsize='16')
+    ax.set_xlabel('Minimum average nucleotide identity', fontsize=18)
+    ax.set_ylabel('Recall', fontsize=18)
+
+
+def plot_pr_qual(data, ax=None):
+    ax = check_ax(ax)
+    metrics = data['qual_metrics']
+    min_qual = metrics['min_qual']
+    ax.plot(min_qual, metrics['recall'], c='k', label='Recall')
+    ax.plot(min_qual, metrics['precision'], c='r', label='Precision')
+    ax.tick_params('both', labelsize='16')
+    ax.set_xlabel('Minimum prediction quality', fontsize=18)
+    ax.legend(loc='lower left', fontsize=16)
+
 
 def main(args):
 
     with open(args.performance_report, 'r') as f:
         data = json.load(f)
 
-    p_recall = data['recall_pid']['recall']
-    pid = data['recall_pid']['pid']
+    plt.figure(figsize=(7, 7))
+    plot_recall_pid(data)
+    plt.tight_layout()
+    plt.savefig(f'{args.outdir}/recall_by_pid.png', dpi=200)
 
     plt.figure(figsize=(7, 7))
-    ax = plt.gca()
-    ax.plot(pid, p_recall, c='k')
-    ax.tick_params('both', labelsize='16')
-    ax.set_xlabel('Average Nucleotide Identity', fontsize=18)
-    ax.set_ylabel('Recall', fontsize=18)
-    plt.savefig(f'{args.outdir}/recall_by_pid.png')
-
-    plt.figure(figsize=(7, 7))
-    ax = plt.gca()
-    q_recall = data['qual_metrics']['recall']
-    q_precision = data['qual_metrics']['precision']
-    min_qual = data['qual_metrics']['min_qual']
-
-    ax.plot(pid, q_recall, c='k', label='Recall')
-    ax.plot(pid, q_precision, c='r', label='Precision')
-    ax.tick_params('both', labelsize='16')
-    ax.set_xlabel('Prediction Quality', fontsize=18)
-    ax.legend(loc='lower left', fontsize=16)
-    plt.savefig(f'{args.outdir}/metrics_by_quality.png')
+    plot_pr_qual(data)
+    plt.tight_layout()
+    plt.savefig(f'{args.outdir}/metrics_by_quality.png', dpi=200)
 
 
 def parse_argparse_args():
@@ -57,7 +67,7 @@ def parse_argparse_args():
 def parse_snakemake_args(snakemake):
     args = argparse.Namespace()
     args.true_tsv = snakemake.input['performance_report']
-    args.outdir = snakemake.output['output_directory']
+    args.outdir = snakemake.output.get('output_directory')
     return args
 
 
