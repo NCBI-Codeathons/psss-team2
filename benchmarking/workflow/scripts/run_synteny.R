@@ -127,7 +127,7 @@ ConvertResults <- function(SyntenyObject) {
 TIMESTART <- Sys.time()
 
 # deal with flexible input data
-# ARGS <- commandArgs(trailingOnly = TRUE)
+ARGS <- commandArgs(trailingOnly = TRUE)
 TargetFolder <- ARGS[1L]
 FocalSeqs <- ARGS[2L]
 
