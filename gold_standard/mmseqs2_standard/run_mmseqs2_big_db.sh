@@ -20,13 +20,16 @@ sudo chown ec2-user:ec2-user /disk
 
 cd /disk
 
+mkdir big_reference
+cd big_reference
+
 # get data sheet
 wget https://raw.githubusercontent.com/NCBI-Codeathons/psss-datasets/master/data.tsv
 
 # script filters data down to files with S3 paths for all references and query
 # TODO: update path to main repo or switch to cloning repo instead of pulling specific file
-wget https://raw.githubusercontent.com/shafferm/psss-team2/main/gold_standard/mmseqs2_standard/filter_data_to_marine_contigs.py
-python filter_data_to_marine_contigs.py
+wget https://raw.githubusercontent.com/shafferm/psss-team2/main/gold_standard/mmseqs2_standard/filter_data_to_query_and_reference.py
+python filter_data_to_query_and_reference.py
 
 # get script for filtering blast 6 resuts to containments
 wget https://raw.githubusercontent.com/shafferm/psss-team2/main/gold_standard/filter_blast_6_to_containments.py
@@ -50,11 +53,11 @@ samtools faidx reference/reference.ml500.fna
 
 # run mmseqs2
 mmseqs easy-search --threads 32 --search-type 3 query/query.ml500.fna reference/reference.ml500.fna mmseqs2_result.b6 tmp
-python filter_blast_6_to_containments.py -i mmseqs2_result.b6 -q query/query.ml500.fna.fai -r reference/reference.ml500.fna.fai -o mmseqs2_result_containments.b6
-gzip mmseqs2_result_containments.b6
+python filter_blast_6_to_containments.py -i mmseqs2_result.b6 -q query/query.ml500.fna.fai -r reference/reference.ml500.fna.fai -o mmseqs2_big_containments.b6
+gzip mmseqs2_marine_containments.b6
 
 # run blast
 makeblastdb -in reference/reference.ml500.fna -input_type fasta -dbtype nucl -parse_seqids
 blastn -db reference/reference.ml500.fna -query query/query.ml500.fna -out blastn_result.b6 -outfmt 6 -num_threads 32
-python filter_blast_6_to_containments.py -i blastn_result.b6 -q query/query.ml500.fna.fai -r reference/reference.ml500.fna.fai -o blastn_result_containments.b6
-gzip blastn_result_containments.b6
+python filter_blast_6_to_containments.py -i blastn_result.b6 -q query/query.ml500.fna.fai -r reference/reference.ml500.fna.fai -o blastn_big_containments.b6
+gzip blastn_marine_containments.b6
