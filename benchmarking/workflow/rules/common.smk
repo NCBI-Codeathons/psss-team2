@@ -28,7 +28,7 @@ def get_final_output():
     outputs = (
         "output/mmseqs2_results.b6.gz",
         "output/blastn_results.b6.gz",
-        "output/synteny_results.b6.gz",
+        # "output/synteny_results.b6.gz",
         get_novel_implementation_output(),
         get_performance_report_output(),
     )
