@@ -30,8 +30,8 @@ def main(args):
     """
 
     # read in files
-    true_df = pd.read_csv(args.true_tsv, sep='\t', compression="gz")
-    pred_df = pd.read_csv(args.pred_tsv, sep='\t', compression="gz")
+    true_df = pd.read_csv(args.true_tsv, sep='\t', compression="gzip")
+    pred_df = pd.read_csv(args.pred_tsv, sep='\t', compression="gzip")
 
     # map files to indices
     ctgs = set(true_df['qseqid'])
