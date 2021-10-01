@@ -84,7 +84,6 @@ rule samtools_faidx:
     output:
         query_fai=get_fai("query"),
         reference_fai=get_fai("reference"),
-    threads: workflow.cores
     log:
         "output/logs/samtools_faidx.log",
     benchmark:
@@ -93,8 +92,8 @@ rule samtools_faidx:
         "../envs/samtools.yaml"
     shell:
         """
-        samtools faidx -@ {threads} {input.query_fna_filtered} {output.query_fai} &>> {log}
-        samtools faidx -@ {threads} {input.reference_fna_filtered} {output.reference_fai} &>> {log}
+        samtools faidx {input.query_fna_filtered} {output.query_fai} &>> {log}
+        samtools faidx {input.reference_fna_filtered} {output.reference_fai} &>> {log}
         """
 
 
@@ -132,7 +131,7 @@ rule mmseqs2:
                -i {params.outfile}                                  \
                -q {input.query_fai}                                 \
                -r {input.reference_fai}                             \
-               -o {params.outfile_filtered}                         \
+               -o {params.outfile_filtered}
 
         gzip {params.outfile}
         gzip {params.outfile_filtered}
@@ -144,8 +143,9 @@ rule synteny:
         query_fna_filtered=get_fna_filtered("query"),
         reference_fna_filtered=get_fna_filtered("reference"),
     output:
-        synteny_outfile="output/synteny_results.b6",
+        synteny_outfile_gz="output/synteny_results.b6.gz",
     params:
+        synteny_outfile=lambda w, output: output.synteny_outfile_gz[:-3],
         reference_folder=lambda w, input: str(
             Path(input.reference_fna_filtered).parent
         ),
@@ -160,7 +160,9 @@ rule synteny:
         RScript workflow/scripts/run_synteny.R          \
                 {params.reference_folder}               \
                 {input.query_fna_filtered}              \
-                {output.synteny_outfile} &> {log}
+                {params.synteny_outfile} &> {log}
+
+        gzip {params.synteny_outfile}
         """
 
 
@@ -168,7 +170,7 @@ rule makeblastdb:
     input:
         reference_fna_filtered=get_fna_filtered("reference"),
     output:
-        reference_fna_nhr=str(Path(get_fna_filtered("reference")).with_suffix(".fna.nhr")),
+        outfiles=get_makeblastdb_out(),
     params:
         input_type="fasta",
         dbtype="nucl",
@@ -214,10 +216,52 @@ rule novel_implementation:
         """
 
 
+rule blastn:
+    input:
+        query=get_fna_filtered("query"),
+        query_fai=get_fai("query"),
+        reference_fai=get_fai("reference")
+        makeblastdb_out=get_makeblastdb_out(),
+    output:
+        outfile_gz="output/blastn_results.b6.gz",
+        outfile_filtered_gz="output/blastn_results_filtered.b6.gz",
+    params:
+        outfmt=6,
+        outfile=lambda w, output: output.outfile_gz[:-3]
+        outfile_filtered=lambda w, output: output.outfile_filtered_gz[:-3]
+        db=lambda w, input: str(Path(input.makeblastdb_out[0]).with_suffix(""))
+    threads: workflow.cores,
+    log:
+        "output/logs/blastn.log",
+    benchmark:
+        "output/benchmarks/blastn.txt"
+    conda:
+        "../envs/blast.yaml"
+    shell:
+        """
+        blastn  -db {params.db}                 \
+                -query {input.query}            \
+                -out {params.outfile}           \
+                -outfmt {params.outfmt}         \
+                -num_threads {threads}          \
+                &>> {log}
+        
+        python workflow/scripts/filter_blast_6_to_containments.py   \
+               -i {params.outfile}                                  \
+               -q {input.query_fai}                                 \
+               -r {input.reference_fai}                             \
+               -o {params.outfile_filtered}
+
+        gzip {params.outfile}
+        gzip {params.outfile_filtered}
+        """
+
+
+
 rule performance_report:
     input:
-        predicted_containments="example/example_submission.tsv",
-        ground_truth=config["ground_truth"],
+        predicted_containments="output/mmseqs2_results.b6.gz",
+        ground_truth="output/blastn_results.b6.gz",
     output:
         performance_report=get_performance_report_output(),
     log:

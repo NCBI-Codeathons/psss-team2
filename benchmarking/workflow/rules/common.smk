@@ -27,7 +27,8 @@ validate_inputs()
 def get_final_output():
     outputs = (
         "output/mmseqs2_results.b6.gz",
-        "output/synteny_results.b6",
+        "output/blastn_results.b6.gz",
+        "output/synteny_results.b6.gz",
         get_novel_implementation_output(),
         get_performance_report_output(),
     )
@@ -59,6 +60,9 @@ def get_fna_filtered(kind="query"):
 def get_fai(kind="query"):
     assert_valid_data_kind(kind)
     return str(Path(get_fna_filtered(kind)).with_suffix(".fai"))
+
+def get_makeblastdb_out():
+    return [str(Path(get_fna_filtered("reference")).with_suffix(".fna.nhr")), ]
 
 
 def get_novel_implementation_output():
