@@ -79,18 +79,22 @@ def main(args):
     ctgs = set(true_df.iloc[:, 0])
     ctgs.update(true_df.iloc[:, 1])
 
-    # find and filter extra contigs in predictions file
-    extras = set(pred_df.iloc[:, 0])
-    extras.update(pred_df.iloc[:, 1])
-    extras -= ctgs
+    if args.filter_extras:
+        # find and filter extra contigs in predictions file
+        extras = set(pred_df.iloc[:, 0])
+        extras.update(pred_df.iloc[:, 1])
+        extras -= ctgs
 
-    if len(extras):
-        print((f'Found {len(extras)} extra contigs in {args.pred_tsv}. '
-                'Discarding before computing metrics.'), file=sys.stderr)
+        if len(extras):
+            print((f'Found {len(extras)} extra contigs in {args.pred_tsv}. '
+                    'Discarding before computing metrics.'), file=sys.stderr)
 
-        mask = np.logical_and(pred_df.iloc[:, 0].isin(ctgs),
-                             pred_df.iloc[:, 1].isin(ctgs))
-        pred_df = pred_df[mask]
+            mask = np.logical_and(pred_df.iloc[:, 0].isin(ctgs),
+                                 pred_df.iloc[:, 1].isin(ctgs))
+            pred_df = pred_df[mask]
+    else:
+        ctgs.update(pred_df.iloc[:, 0])
+        ctgs.update(pred_df.iloc[:, 1])
 
     # build graph
     ## map sequence identifiers to indices
@@ -114,7 +118,11 @@ def main(args):
     metrics = calc_scores((true_g != 0).astype(int), (pred_g != 0).astype(int))
 
     pid_metrics = qual_metrics(true_g, pred_g)
-    metrics['recall_pid'] = {'recall': pid_metrics['recall'], 'pid': pid_metrics['min_qual'], 'tp': pid_metrics['tp'], 'fn': pid_metrics['fn'], 'fp': pid_metrics['fp']}
+    metrics['recall_pid'] = {'recall': pid_metrics['recall'],
+                             'pid': pid_metrics['min_qual'],
+                             'tp': pid_metrics['tp'],
+                             'fn': pid_metrics['fn'],
+                             'fp': pid_metrics['fp']}
 
     if pred_has_qual:
         metrics['qual_metrics'] = metrics_by_qual(true_g, pred_g)
@@ -139,6 +147,8 @@ def parse_argparse_args():
                         help="predicted containments in tabular BLAST output")
     parser.add_argument("-o", "--output", type=str,
                         help="the file to save results to", default=None)
+    parser.add_argument("-f", "--filter_extras", action='store_true',
+                        help="filter extra contigs from predictions", default=False)
     args = parser.parse_args()
 
     return args
@@ -149,6 +159,7 @@ def parse_snakemake_args(snakemake):
     args.true_tsv = snakemake.input['ground_truth']
     args.pred_tsv = snakemake.input['predicted_containments']
     args.output = snakemake.output['performance_report']
+    args.filter_extras = snakemake.output.get('filter_extras', False)
     return args
 
 
