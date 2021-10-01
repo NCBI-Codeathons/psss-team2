@@ -175,7 +175,7 @@ rule makeblastdb:
         input_type="fasta",
         dbtype="nucl",
     log:
-        "output/logs/makeblastdb.log"
+        "output/logs/makeblastdb.log",
     benchmark:
         "output/benchmarks/makeblastdb.txt"
     conda:
@@ -220,17 +220,17 @@ rule blastn:
     input:
         query=get_fna_filtered("query"),
         query_fai=get_fai("query"),
-        reference_fai=get_fai("reference")
+        reference_fai=get_fai("reference"),
         makeblastdb_out=get_makeblastdb_out(),
     output:
         outfile_gz="output/blastn_results.b6.gz",
         outfile_filtered_gz="output/blastn_results_filtered.b6.gz",
     params:
         outfmt=6,
-        outfile=lambda w, output: output.outfile_gz[:-3]
-        outfile_filtered=lambda w, output: output.outfile_filtered_gz[:-3]
-        db=lambda w, input: str(Path(input.makeblastdb_out[0]).with_suffix(""))
-    threads: workflow.cores,
+        outfile=lambda w, output: output.outfile_gz[:-3],
+        outfile_filtered=lambda w, output: output.outfile_filtered_gz[:-3],
+        db=lambda w, input: str(Path(input.makeblastdb_out[0]).with_suffix("")),
+    threads: workflow.cores
     log:
         "output/logs/blastn.log",
     benchmark:
@@ -245,7 +245,7 @@ rule blastn:
                 -outfmt {params.outfmt}         \
                 -num_threads {threads}          \
                 &>> {log}
-        
+
         python workflow/scripts/filter_blast_6_to_containments.py   \
                -i {params.outfile}                                  \
                -q {input.query_fai}                                 \
@@ -255,7 +255,6 @@ rule blastn:
         gzip {params.outfile}
         gzip {params.outfile_filtered}
         """
-
 
 
 rule performance_report:

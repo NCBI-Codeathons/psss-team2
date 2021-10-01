@@ -61,8 +61,11 @@ def get_fai(kind="query"):
     assert_valid_data_kind(kind)
     return str(Path(get_fna_filtered(kind)).with_suffix(".fai"))
 
+
 def get_makeblastdb_out():
-    return [str(Path(get_fna_filtered("reference")).with_suffix(".fna.nhr")), ]
+    return [
+        str(Path(get_fna_filtered("reference")).with_suffix(".fna.nhr")),
+    ]
 
 
 def get_novel_implementation_output():
