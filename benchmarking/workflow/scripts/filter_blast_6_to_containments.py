@@ -6,8 +6,7 @@ FAI_HEADER = ['NAME', 'LENGTH', 'OFFSET', 'LINEBASES', 'LINEWIDTH', 'QUALOFFSET'
 QUERY_INDEX_PATH = 'query/query.ml500.fna.fai'
 REFERENCE_INDEX_PATH = 'reference/reference.ml500.fna.fai'
 
-BOUTFMT6_COLUMNS = ['qId', 'tId', 'seqIdentity', 'alnLen', 'mismatchCnt', 'gapOpenCnt', 'qStart', 'qEnd', 'tStart',
-                    'tEnd', 'eVal', 'bitScore']
+BOUTFMT6_COLUMNS = "qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore".split()
 RESULTS_PATH = 'result.b6'
 
 
@@ -21,9 +20,9 @@ def check_containment(row, query_index, reference_index, percent_identity=PERCEN
     """Checks if a row from a blast out format 6 file is a containment
     Takes in a row from a blast out format 6 table, a DataFrames with query sequence and reference sequence data.
     """
-    if (row['qId'] != row['tId']) and (row['seqIdentity'] >= percent_identity):
-        query_covered = row['alnLen']/float(query_index.loc[row['qId'], 'LENGTH'])
-        reference_covered = row['alnLen']/float(reference_index.loc[row['tId'], 'LENGTH'])
+    if (row['qseqid'] != row['sseqid']) and (row['pident'] >= percent_identity):
+        query_covered = row['length']/float(query_index.loc[row['qseqid'], 'LENGTH'])
+        reference_covered = row['length']/float(reference_index.loc[row['sseqid'], 'LENGTH'])
         if query_covered >= covered_length or reference_covered >= covered_length:
             return True
         else:
