@@ -42,21 +42,46 @@ region, and that covers more than 95% of the length of the shortest contig.
 A containment should be reported irrespective of whether the query is the longer or the shorter
 among the contigs in the containment.  
 
-Assume the length of contig A is 1000 bp and the length of contig B is 10000, the following
+Assume the length of contig A is 1000 bp and the length of contig B is 4000, the following
 are examples of valid containment relationships.
 
-[TODO - include several examples of tab-delimited output for correct and incorrect matches]
-[TODO - all of A included]
-[TODO - < 5% of A mismatches at one or both ends]
+#### A completely contained
+```
+qseqid sseqid	pident	length	mismatch	gapopen	qstart	qend	sstart	send	evalue	bitscore
+A   B   98.2    1000    *   *   1   1000    2000    3000    *   *
+```
+#### A has "overhang" at 5' end
+```
+qseqid sseqid	pident	length	mismatch	gapopen	qstart	qend	sstart	send	evalue	bitscore
+A   B   97.0    960    *   *   40   1000    1    960    *   *
+```
+#### A has overhangs at both ends
+```
+qseqid sseqid	pident	length	mismatch	gapopen	qstart	qend	sstart	send	evalue	bitscore
+A   B   96.7    965    *   *   30   995    1000    1965    *   *
+```
 
 Here are several examples of relationships that don't represent valid containments
-[TODO - alignment < 95% ]
-[TODO - < 95% of A matches with mismatches at one or both ends]
+
+#### Low quality alignment
+```
+qseqid sseqid	pident	length	mismatch	gapopen	qstart	qend	sstart	send	evalue	bitscore
+A   B  90.4    1000    *   *   1   1000    2000    3000    *   *
+```
+
+#### Insufficient "breadth" of alignment
+```
+qseqid sseqid	pident	length	mismatch	gapopen	qstart	qend	sstart	send	evalue	bitscore
+A   B   96.7    900    *   *   50   950    1050    1850    *   *
+```
 
 ### Overlap
 [TODO] to be defined later
 
 ### Inner match [TODO - get better name]
+[TODO] to be defined later
+
+### Interleaved/multi-matched
 [TODO] to be defined later
  
 ## Expectations from benchmarked tool
@@ -143,4 +168,11 @@ of the benchmarked tool
 
 Additional reports stratify the accuracy measures described above by the percent identity
 in the gold standard and by the length of the smaller contig in each pair within the
+gold standard.  When stratifying the data, only certain measures can be computed, specifically
+the true positives and false negatives if relying solely on information available in the truth, 
+hence, only recall can be plotted against the percent identity or length of contigs in the 
 gold standard.
+
+If the tool being benchmarked produces information about the confidence in each containment reported
+we can also stratify the false positives by this confidence information, allowing us to plot
+the precision against either the length of contigs or reported confidence value.
