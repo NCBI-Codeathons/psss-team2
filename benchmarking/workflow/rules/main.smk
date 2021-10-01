@@ -92,8 +92,8 @@ rule samtools_faidx:
         "../envs/samtools.yaml"
     shell:
         """
-        samtools faidx {input.query_fna_filtered} {output.query_fai} &>> {log}
-        samtools faidx {input.reference_fna_filtered} {output.reference_fai} &>> {log}
+        samtools faidx {input.query_fna_filtered} &>> {log}
+        samtools faidx {input.reference_fna_filtered} &>> {log}
         """
 
 
