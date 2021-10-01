@@ -59,7 +59,7 @@ def get_fna_filtered(kind="query"):
 
 def get_fai(kind="query"):
     assert_valid_data_kind(kind)
-    return str(Path(get_fna_filtered(kind)).with_suffix(".fai"))
+    return str(Path(get_fna_filtered(kind)).with_suffix(".fna.fai"))
 
 
 def get_makeblastdb_out():
