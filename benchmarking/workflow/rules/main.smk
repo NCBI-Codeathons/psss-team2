@@ -131,7 +131,8 @@ rule mmseqs2:
                -i {params.outfile}                                  \
                -q {input.query_fai}                                 \
                -r {input.reference_fai}                             \
-               -o {params.outfile_filtered} &>> {log}
+               -o {params.outfile_filtered}                         \
+               --as_decimal &>> {log}
 
         gzip {params.outfile} &>> {log}
         gzip {params.outfile_filtered} &>> {log}

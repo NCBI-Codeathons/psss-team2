@@ -59,10 +59,10 @@ def main(args):
     # build graph
     ## map sequence identifiers to indices
     ctgs = dict(zip(ctgs, range(len(ctgs))))
-    true_df["qseqid_idx"] = [ctgs[s] for s in true_df["qseqid"]]
-    true_df["sseqid_idx"] = [ctgs[s] for s in true_df["sseqid"]]
-    pred_df["qseqid_idx"] = [ctgs[s] for s in pred_df["qseqid"]]
-    pred_df["sseqid_idx"] = [ctgs[s] for s in pred_df["sseqid"]]
+    true_df["qseqid_idx"] = [ctgs.get(s, 0) for s in true_df["qseqid"]]
+    true_df["sseqid_idx"] = [ctgs.get(s, 0) for s in true_df["sseqid"]]
+    pred_df["qseqid_idx"] = [ctgs.get(s, 0) for s in pred_df["qseqid"]]
+    pred_df["sseqid_idx"] = [ctgs.get(s, 0) for s in pred_df["sseqid"]]
 
     ## build adjacency matrix
     n_ctgs = len(ctgs)
