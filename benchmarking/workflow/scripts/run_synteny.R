@@ -250,7 +250,7 @@ ResTable <- do.call(rbind,
 ResTable <- ResTable[ResTable$pident > 0.95, ]
 
 write.table(x = ResTable,
-            file = ARGS[L3],
+            file = ARGS[3L],
             append = FALSE,
             quote = FALSE,
             row.names = FALSE,
