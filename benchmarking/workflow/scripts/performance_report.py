@@ -68,8 +68,8 @@ def main(args):
     """
 
     # read in files
-    true_df = pd.read_csv(args.true_tsv, sep="\t", compression="gzip")
-    pred_df = pd.read_csv(args.pred_tsv, sep="\t", compression="gzip")
+    true_df = pd.read_csv(args.true_tsv, sep="\t")
+    pred_df = pd.read_csv(args.pred_tsv, sep="\t")
     # If predictions have quality scores, we will generate some extra metrics.
     # The third column is assumed to be quality scores.
     pred_has_qual = len(pred_df.columns) > 2
