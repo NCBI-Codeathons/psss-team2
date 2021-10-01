@@ -136,6 +136,7 @@ FocalSeqs <- ARGS[2L]
 # FocalSeqs <- "~/PSSS_CodeathonData/nmdc_mga04781_contigs.fna"
 
 FileVector01 <- list.files(path = TargetFolder,
+                           pattern = "contigs.fna$"
                            full.names = TRUE)
 
 # check for focal seqs in target folder, if present remove them
