@@ -259,8 +259,8 @@ rule blastn:
 
 rule performance_report:
     input:
-        predicted_containments="output/mmseqs2_results.b6.gz",
-        ground_truth="output/blastn_results.b6.gz",
+        predicted_containments="output/mmseqs2_results_filtered.b6.gz",
+        ground_truth="output/blastn_results_filtered.b6.gz",
     output:
         performance_report=get_performance_report_output(),
     log:
