@@ -168,7 +168,7 @@ rule makeblastdb:
     input:
         reference_fna_filtered=get_fna_filtered("reference"),
     output:
-        reference_fna_nhr=lambda w, input: str(Path(input.reference_fna_filtered).with_suffix(".fna.nhr")),
+        reference_fna_nhr=str(Path(get_fna_filtered("reference")).with_suffix(".fna.nhr")),
     params:
         input_type="fasta",
         dbtype="nucl",
