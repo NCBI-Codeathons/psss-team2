@@ -63,8 +63,10 @@ def get_fai(kind="query"):
 
 
 def get_makeblastdb_out():
+    extensions = ["nhr", "nin", "ndb"]
     return [
-        str(Path(get_fna_filtered("reference")).with_suffix(".fna.nhr")),
+        str(Path(get_fna_filtered("reference")).with_suffix(f".fna.{ext}"))
+        for ext in extensions
     ]
 
 
