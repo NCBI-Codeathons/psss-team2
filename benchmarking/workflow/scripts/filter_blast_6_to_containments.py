@@ -60,7 +60,7 @@ def find_containments(
     reference_index = reference_index.set_index("NAME")
 
     if has_header:
-        search_results = pd.read_csv(results_path, sep="\t", header=True)
+        search_results = pd.read_csv(results_path, sep="\t")
         search_results.columns = BOUTFMT6_COLUMNS
     else:
         search_results = pd.read_csv(
