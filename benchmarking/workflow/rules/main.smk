@@ -272,3 +272,31 @@ rule performance_report:
         "../envs/performance_report.yaml"
     script:
         "../scripts/performance_report.py"
+
+
+rule plot_report:
+    input:
+        performance_report=get_performance_report_output(),
+    output:
+        output_directory="output/reports/mmseqs2",
+    log:
+        "output/logs/plot_report.log",
+    conda:
+        "../envs/performance_report.yaml"
+    script:
+        "../scripts/plot_report.py"
+
+
+rule plot_comparision_report:
+    input:
+        performance_reports=[get_performance_report_output()],
+    arguments:
+        labels="mmseqs2,"
+    output:
+        output_directory="output/reports",
+    log:
+        "output/logs/plot_comparison_report.log",
+    conda:
+        "../envs/performance_report.yaml"
+    script:
+        "../scripts/plot_comparison_report.py"
