@@ -21,7 +21,7 @@ The benchmarking tool takes as input:
   or more paths to metagenomic samples.
 * The path to an executable that will run the code being benchmarked
 
-These inputs are provided in [??Yaml file??]
+These inputs are provided in [the workflow config file](../config/config.yaml).
 
 ## Outputs
 The benchmarking tool runs the code to be benchmarked then produces a report that includes
