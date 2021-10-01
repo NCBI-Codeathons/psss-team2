@@ -131,10 +131,10 @@ rule mmseqs2:
                -i {params.outfile}                                  \
                -q {input.query_fai}                                 \
                -r {input.reference_fai}                             \
-               -o {params.outfile_filtered}
+               -o {params.outfile_filtered} &>> {log}
 
-        gzip {params.outfile}
-        gzip {params.outfile_filtered}
+        gzip {params.outfile} &>> {log}
+        gzip {params.outfile_filtered} &>> {log}
         """
 
 
@@ -162,7 +162,7 @@ rule synteny:
                 {input.query_fna_filtered}              \
                 {params.synteny_outfile} &> {log}
 
-        gzip {params.synteny_outfile}
+        gzip {params.synteny_outfile} &>> {log}
         """
 
 
@@ -250,10 +250,10 @@ rule blastn:
                -i {params.outfile}                                  \
                -q {input.query_fai}                                 \
                -r {input.reference_fai}                             \
-               -o {params.outfile_filtered}
+               -o {params.outfile_filtered} &>> {log}
 
-        gzip {params.outfile}
-        gzip {params.outfile_filtered}
+        gzip {params.outfile} &>> {log}
+        gzip {params.outfile_filtered} &>> {log}
         """
 
 
