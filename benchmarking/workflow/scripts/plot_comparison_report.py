@@ -1,12 +1,21 @@
 import argparse
 import json
 import logging
+import os
 import sys
 
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+
+def check_outdir(path):
+    if not os.path.exists(path):
+        os.mkdir(path)
+    elif not os.path.isdir(path):
+        print(f'{path} exists and is not a directory', file=sys.stderr)
+        exit(1)
+
 
 def check_ax(ax):
     if ax is None:
@@ -19,11 +28,22 @@ def plot_pr(data, ax=None, label=None, color=None):
     ax.plot(data['qual_metrics']['recall'], data['qual_metrics']['precision'],
             label=label, color=color)
     ax.tick_params('both', labelsize='16')
-    ax.set_xlabel('Precision', fontsize=18)
+    ax.set_xlabel('Recall', fontsize=18)
+    ax.set_ylabel('Precision', fontsize=18)
+
+
+def plot_recall(data, ax=None, label=None, color=None):
+    ax = check_ax(ax)
+    ax.plot(data['recall_pid']['pid'], data['recall_pid']['recall'],
+            label=label, color=color)
+    ax.tick_params('both', labelsize='16')
+    ax.set_xlabel('Minmium average nucleotide identity', fontsize=18)
     ax.set_ylabel('Recall', fontsize=18)
 
 
 def main(args):
+
+    check_outdir(args.outdir)
 
     labels = args.labels
     if labels is None:
@@ -41,8 +61,8 @@ def main(args):
         print(f'You can plot at most 20 curves currently.')
         exit(1)
 
-    plt.figure(figsize=(7, 7))
-    ax = plt.gca()
+    pr_fig = plt.figure(figsize=(7, 7))
+    rec_fig = plt.figure(figsize=(7, 7))
 
     cmap = mpl.cm.get_cmap('tab20')
     a = np.linspace(0, 1, 20)
@@ -53,10 +73,13 @@ def main(args):
         with open(report, 'r') as f:
             data = json.load(f)
 
-        plot_pr(data, ax=ax, label=label, color=colors[i])
-        plt.tight_layout()
-    ax.legend()
-    plt.savefig(f'{args.outdir}/pr_curve.png', dpi=200)
+        plot_pr(data, ax=pr_fig.gca(), label=label, color=colors[i])
+        plot_recall(data, ax=rec_fig.gca(), label=label, color=colors[i])
+
+    for fig, path in zip((pr_fig, rec_fig), ('pr_curve', 'recall_pid')):
+        fig.tight_layout()
+        fig.gca().legend()
+        fig.savefig(f'{args.outdir}/{path}.png', dpi=200)
 
 
 def parse_argparse_args():
