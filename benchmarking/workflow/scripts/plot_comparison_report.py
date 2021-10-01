@@ -55,7 +55,7 @@ def main(args):
 
         plot_pr(data, ax=ax, label=label, color=colors[i])
         plt.tight_layout()
-
+    ax.legend()
     plt.savefig(f'{args.outdir}/pr_curve.png', dpi=200)
 
 
