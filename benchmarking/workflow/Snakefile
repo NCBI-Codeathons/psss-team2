@@ -1,0 +1,11 @@
+configfile: "config/config.yaml"
+
+
+# Rules
+include: "rules/common.smk"
+include: "rules/main.smk"
+
+
+rule all:
+    input:
+        get_final_output(),
